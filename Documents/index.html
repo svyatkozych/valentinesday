@@ -133,14 +133,14 @@
       overflow: hidden;
     }
 
-    /* Контейнер для причин */
+    /* Контейнер для 100 причин */
     #reasons-container {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      pointer-events: none;  /* щоб не заважати клікам на кнопки */
       z-index: 25;
       overflow: hidden;
     }
@@ -161,7 +161,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       border: 1px solid #ffc0cb;
-      pointer-events: none;
+      pointer-events: none; /* не інтерактивні, тільки візуальний ефект */
       opacity: 0;
       animation: appearAndFade 7s ease-out forwards;
       z-index: 30;
@@ -222,10 +222,13 @@
 </head>
 <body>
 
+  <!-- Контейнер фонових частинок (сердечка, пелюстки, іскри) -->
   <div id="effects-container"></div>
 
+  <!-- Контейнер для 100 причин (вони будуть з'являтись тут) -->
   <div id="reasons-container"></div>
 
+  <!-- Головна картка-валентинка -->
   <main class="valentine-card">
     <h1>💖 З днем святого Валентина КОХАНА 💖</h1>
     <div class="sub">чому я тебе кохаю</div>
@@ -234,12 +237,14 @@
       <span>💗</span> нескінченність <span>💗</span>
     </div>
 
+    <!-- Кнопки запуску спецефектів -->
     <div class="button-area">
       <button class="btn" id="heartsBtn"><span>❤️</span> Сердечка</button>
       <button class="btn btn-secondary" id="petalsBtn"><span>🌹</span> Пелюстки</button>
       <button class="btn" id="sparkleBtn"><span>✨</span> Іскри</button>
     </div>
 
+    <!-- Лічильник появ причин (буде оновлюватись) -->
     <div class="counter-box" id="reasonsCounter">
       Причин з'явилось: <span id="countDisplay">0</span>
     </div>
@@ -254,6 +259,7 @@
       // ----- ЕФЕКТИ (сердечка, пелюстки, іскри) -----
       const effectsContainer = document.getElementById('effects-container');
       
+      // Лічильник для кількості показаних причин
       let reasonShowCount = 0;
       const countSpan = document.getElementById('countDisplay');
 
@@ -261,35 +267,34 @@
       const petalsBtn = document.getElementById('petalsBtn');
       const sparkleBtn = document.getElementById('sparkleBtn');
 
-      // Функція створення фонових ефектів (додано параметр isBurst для кнопок)
-      function createEffect(type, count = 15, isBurst = false) {
+      // Функція створення фонових ефектів
+      function createEffect(type, count = 15) {
         for (let i = 0; i < count; i++) {
           const el = document.createElement('div');
           if (type === 'floating-heart') {
-            el.innerHTML = ['❤️','🧡','💛','💚','💙','💜','💖','💗'][Math.floor(Math.random()*8)];
-            el.style.fontSize = (1.5 + Math.random()*2) + 'rem';
+            el.innerHTML = ['❤️','🧡','💛','💚','💙','💜','💖','💗'][Math.floor(Math.random()*6)];
+            el.style.fontSize = (1.3 + Math.random()*2) + 'rem';
           } else if (type === 'petal') {
             el.innerHTML = ['🌸','🌹','🌺','🌸','🌼','🌷'][Math.floor(Math.random()*6)];
-            el.style.fontSize = (1.8 + Math.random()*2) + 'rem';
+            el.style.fontSize = (1.5 + Math.random()*1.8) + 'rem';
             el.style.color = '#ffb7c5';
           } else if (type === 'sparkle') {
             el.innerHTML = ['✨','⭐','🌟','💫','⚡'][Math.floor(Math.random()*5)];
-            el.style.fontSize = (1.2 + Math.random()*1.8) + 'rem';
+            el.style.fontSize = (1 + Math.random()*1.5) + 'rem';
             el.style.color = '#ffffb0';
             el.style.textShadow = '0 0 12px gold';
           }
 
           el.style.position = 'absolute';
-          // Розподіляємо по всій ширині екрану
-          el.style.left = (Math.random() * 100) + '%';
+          el.style.left = (2 + Math.random() * 96) + '%';
           el.style.pointerEvents = 'none';
+          el.style.opacity = '0.7';
+          el.style.filter = 'drop-shadow(0 0 5px #ffaacc)';
           el.style.zIndex = '5';
           
-          // Логіка для "спалаху" при кліку (швидкий старт) або для фону (повільний)
-          const animDelay = isBurst ? Math.random() * 0.3 : Math.random() * 4;
-          const duration = isBurst ? 2.5 + Math.random() * 2 : 5 + Math.random() * 6;
-          
-          el.style.animation = `burstUp ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+          const animDelay = Math.random() * 4;
+          const duration = 5 + Math.random() * 6;
+          el.style.animation = `floatUp ${duration}s linear forwards`;
           el.style.animationDelay = animDelay + 's';
 
           effectsContainer.appendChild(el);
@@ -300,38 +305,26 @@
         }
       }
 
-      // Нова анімація: об'єкти спалахують знизу, летять вгору і плавно зникають
+      // Додаємо ключові кадри для floatUp (якщо ще не додано)
       const style = document.createElement('style');
       style.innerHTML = `
-        @keyframes burstUp {
-          0% { 
-            transform: translateY(110vh) rotate(0deg) scale(0); 
-            opacity: 0; 
-            filter: brightness(2) drop-shadow(0 0 15px rgba(255,255,255,0.8)); 
-          }
-          15% { 
-            opacity: 1; 
-            transform: translateY(80vh) rotate(15deg) scale(1.3); 
-            filter: brightness(1.2) drop-shadow(0 0 5px rgba(255,105,180,0.5)); 
-          }
-          100% { 
-            transform: translateY(-20vh) rotate(180deg) scale(1); 
-            opacity: 0; 
-            filter: brightness(1); 
-          }
+        @keyframes floatUp {
+          0% { transform: translateY(100vh) rotate(0deg) scale(0.7); opacity: 0.3; }
+          50% { opacity: 1; transform: translateY(50vh) rotate(15deg) scale(1.2); }
+          100% { transform: translateY(-20vh) rotate(30deg) scale(1); opacity: 0; }
         }
       `;
       document.head.appendChild(style);
 
-      // Обробники кнопок (генерують фонтан із 30-40 частинок зі спалахом)
-      heartsBtn.addEventListener('click', () => { createEffect('floating-heart', 35, true); });
-      petalsBtn.addEventListener('click', () => { createEffect('petal', 30, true); });
-      sparkleBtn.addEventListener('click', () => { createEffect('sparkle', 45, true); });
+      // Обробники кнопок
+      heartsBtn.addEventListener('click', () => { createEffect('floating-heart', 22); });
+      petalsBtn.addEventListener('click', () => { createEffect('petal', 18); });
+      sparkleBtn.addEventListener('click', () => { createEffect('sparkle', 30); });
 
-      // ---------- 100+ ПРИЧИН ----------
+      // ---------- 100 ПРИЧИН (з'являються і зникають) ----------
       const reasonsContainer = document.getElementById('reasons-container');
 
-      // Оновлений масив (додано 20 гаряченьких причин)
+      // Масив зі 100 унікальних і милих причин (можна додати ще, але тут рівно 100)
       const reasonsList = [
         "ти — моє сонце",
         "твій сміх — найкраща музика",
@@ -402,7 +395,7 @@
         "«ти не судиш за погані дні»",
         "«ти даєш право на помилку»",
         "«ти вчиш мене бути сильнішим»",
-        "«ти моє натхнення»",
+        "«ти моє натхнення»,",
         "«ти любиш тварин, як і я»",
         "«ти хочеш дітей (чи не хочеш — головне, що ми разом)»",
         "«ти плануєш старість зі мною»",
@@ -421,7 +414,6 @@
         "«ти — найкраще, що зі мною сталось»",
         "«ти просто є — і це найбільша причина»",
         "«ти моя доля, і я вдячий за це»",
-        // --- 20 ГАРЯЧЕНЬКИХ ПРИЧИН ---
         "від твого погляду в мене мурашки по шкірі",
         "твій дотик зводить мене з розуму",
         "ти найпалкіша людина у всьому світі",
@@ -429,6 +421,7 @@
         "ти змушуєш моє серце битися шалено швидко",
         "я втрачаю голову, коли ти так близько",
         "від твого гарячого шепоту на вушко я тану",
+        "кожна ніч з тобою — це справжня магія",
         "ти знаєш, як розпалити в мені полум'я",
         "твоє тіло — це ідеальне мистецтво",
         "я хочу тебе щомиті",
@@ -436,11 +429,10 @@
         "ти пробуджуєш мої найпотаємніші бажання",
         "коли ти притискаєшся до мене, весь світ зникає",
         "твої губи створені спеціально для моїх",
-        "ти мій найсолодший і найбажаніший гріх",
         "від однієї думки про тебе мені стає гаряче",
         "наша пристрасть здатна спалити всі перешкоди",
         "ти вмієш спокушати одним лише поглядом",
-        "я нескінченно залежний від твоїх дотиків"
+        "я нескінченно залежний(а) від твоїх дотиків"
       ];
 
       // Функція для показу однієї випадкової причини
@@ -448,54 +440,63 @@
         const reason = document.createElement('div');
         reason.className = 'reason-item';
 
+        // Випадковий індекс
         const randomIndex = Math.floor(Math.random() * reasonsList.length);
         reason.textContent = '💝 ' + reasonsList[randomIndex];
 
+        // Випадкове положення (5% - 90% щоб не вилазило за край)
         const left = 5 + Math.random() * 80; // %
         const top = 5 + Math.random() * 75;  // %
         reason.style.left = left + '%';
         reason.style.top = top + '%';
 
+        // Випадкова затримка анімації (негативна не потрібна, просто 0-2с)
         const animDelay = Math.random() * 2;
         reason.style.animationDelay = animDelay + 's';
 
+        // Тривалість життя причини 7-10 секунд (відповідно до анімації)
         const duration = 7 + Math.random() * 4; // 7-11 сек
 
+        // Додаємо в контейнер
         reasonsContainer.appendChild(reason);
 
+        // Оновлюємо лічильник
         reasonShowCount++;
         countSpan.textContent = reasonShowCount;
 
+        // Видалити після завершення анімації
         setTimeout(() => {
           if (reason.parentNode) reason.remove();
         }, duration * 1000 + 500);
       }
 
+      // Запускаємо постійне з'являння причин (кожні 0.8-2.2 секунди нова причина)
       function startReasonsLoop() {
         setInterval(() => {
           showRandomReason();
-        }, 800 + Math.random() * 1400);
+        }, 800 + Math.random() * 1400); // випадковий інтервал
       }
 
+      // Стартуємо після завантаження сторінки
       window.addEventListener('load', () => {
         startReasonsLoop();
 
-        // Фонова генерація (повільна і ненав'язлива)
+        // Додатково: фонова генерація частинок (для краси)
         setInterval(() => {
           const r = Math.random();
-          if (r < 0.4) createEffect('floating-heart', 1, false);
-          else if (r < 0.7) createEffect('petal', 1, false);
-          else createEffect('sparkle', 2, false);
-        }, 1500);
+          if (r < 0.4) createEffect('floating-heart', 2);
+          else if (r < 0.7) createEffect('petal', 2);
+          else createEffect('sparkle', 3);
+        }, 2500);
       });
 
-      // Трейл іскорки за мишкою
+      // Невеличкий трейл іскорки за мишкою (романтично)
       let mouseThrottle = false;
       document.addEventListener('mousemove', (e) => {
         if (mouseThrottle) return;
         mouseThrottle = true;
         setTimeout(() => { mouseThrottle = false; }, 100);
-        if (Math.random() > 0.6) {
+        if (Math.random() > 0.7) {
           const spark = document.createElement('div');
           spark.innerHTML = '✨';
           spark.style.position = 'fixed';
@@ -504,9 +505,9 @@
           spark.style.fontSize = '1.4rem';
           spark.style.pointerEvents = 'none';
           spark.style.zIndex = '9999';
-          spark.style.animation = `burstUp 2s linear forwards`;
+          spark.style.animation = `floatUp 2.5s linear forwards`;
           effectsContainer.appendChild(spark);
-          setTimeout(() => { if (spark.parentNode) spark.remove(); }, 2000);
+          setTimeout(() => { if (spark.parentNode) spark.remove(); }, 2500);
         }
       });
 
